@@ -36,6 +36,7 @@ int main(void)
             cout << endl << "9. 设置指定边的权.";
             cout << endl << "A. Kruskal 求最小生成树.";
             cout << endl << "B. Prim 求最小生成树.";
+            cout << endl << "C. CountDegree.";
 		    cout << endl << "0. 退出";
 		    cout << endl << "选择功能(0~9):";
 		    cin >> c;
@@ -110,10 +111,16 @@ int main(void)
                     system("PAUSE");				// 调用库函数system()
 
                     cout << "从顶点A开始，利用Prim算法产生最小生成树的边:" << endl;
-                    int u0 = 0;
-                    MiniSpanTreePrim(net, u0);		// Prim算法
+                    MiniSpanTreePrim(net, 0);		// Prim算法
                     cout << endl;
                     break;
+                case 'C':
+                    cout << "输入节点:";
+                    cin >> e;
+                    v = net.CountDegree(e);
+                    cout << e << "的度为" << v << endl;				// 显示顶点号
+                    break;
+
        	      }
          }
 	}

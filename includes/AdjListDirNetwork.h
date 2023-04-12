@@ -41,6 +41,7 @@ public:
 	void DeleteArc(int v1, int v2);			     // 删除从顶点为v1到v2的边			 
 	WeightType GetWeight(int v1, int v2) const;	 // 求从顶点为v1到v2的边的权值
 	void SetWeight(int v1, int v2, WeightType w);// 设置从顶点为v1到v2的边的权值
+    int CountDegree(ElemType v);
 	Status GetTag(int v) const;				     // 求顶点v的标志		 
 	void SetTag(int v, Status tag) const;	     // 设置顶点v的标志为tag	 
 	AdjListDirNetwork(const AdjListDirNetwork<ElemType, WeightType> &copy);	// 复制构造函数
@@ -48,6 +49,24 @@ public:
 		(const AdjListDirNetwork<ElemType, WeightType> &copy); // 重载赋值运算符 
     void Display();	// 显示有向网邻接表 
 };
+
+template<class ElemType, class WeightType>
+int AdjListDirNetwork<ElemType, WeightType>::CountDegree(ElemType v) {
+    AdjListNetworkArc<WeightType> *p;
+    int cnt = 0;
+    for (int vi = 0; vi < vexNum; vi++)	{	// 显示第v个邻接链表
+        if(vexTable[vi].data == v){
+            p = vexTable[vi].firstarc;
+            while (p != NULL) {
+                cnt ++;
+                p = p->nextarc;
+            }
+        }
+    }
+    return cnt;
+}
+
+
 
 // 有向网的邻接表类的实现部分
 template <class ElemType, class WeightType>
