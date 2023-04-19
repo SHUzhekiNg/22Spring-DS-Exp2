@@ -11,12 +11,6 @@ struct ElemNode {
     int parent;                    // 双亲域
 };
 
-#endif
-
-
-#ifndef __UFSETS_H__            // 如果没有定义__UFSETS_H__
-#define __UFSETS_H__            // 那么定义__UFSETS_H__
-
 // 并查集
 template<class ElemType>
 class UFSets {
@@ -24,11 +18,8 @@ protected:
 // 并查集的数据成员:
     ElemNode<ElemType> *sets;             // 存储结点的双亲
     int size;                             // 结点个数
-
 // 辅助函数
-    int Find(ElemType e) const;             // 查找元素e所在等价类的根
     int CollapsingFind(ElemType e) const;// 查找元素e所在等价类的根
-
 public:
 // 并查集的函数成员:
     UFSets() {
@@ -42,6 +33,7 @@ public:
     int GetOrder(ElemType e) const;       // 根据指定下标取元素值
     int Getsize() const;
 
+    int Find(ElemType e) const;             // 查找元素e所在等价类的根
     void Union(ElemType a, ElemType b);     // 合并a与b所在的等价类
     void WeightedUnion(ElemType a, ElemType b);     // 根据结点多少合并a与b所在的等价类
     bool Differ(ElemType a, ElemType b); // 判断元素a、b是否在同一个等价类
@@ -71,7 +63,7 @@ int UFSets<ElemType>::Find(ElemType e) const
     while (p < size && sets[p].data != e)
         p++;
     if (p == size)
-        throw Error("元素不存在!");                // 抛出异常
+        throw Error("Find元素不存在!");                // 抛出异常
     while (sets[p].parent > -1)
         p = sets[p].parent;                     // 查找根
     return p;
@@ -113,7 +105,7 @@ ElemType UFSets<ElemType>::GetElem(int p) const
 // 操作结果：求下标为p的元素值 
 {
     if (p < 0 || p >= size)
-        throw Error("元素不存在!");            // 抛出异常
+        throw Error("GetElem元素不存在!");            // 抛出异常
     return sets[p].data;                    // 返回元素值
 }
 

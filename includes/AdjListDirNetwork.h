@@ -17,20 +17,16 @@ protected:
     WeightType infinity;                            // 无穷大的值
     void ConnectedComponent_dfs(int v);
 
-    void DFS(int start, int curv, int arcnum, int &v1_to_delete, int &v2_to_delete);
-
 public:
 // 抽象数据类型方法声明及重载编译系统默认方法声明:
     AdjListDirNetwork(ElemType es[], int vertexNum, int vertexMaxNum = DEFAULT_SIZE,
                       WeightType infinit = (WeightType) DEFAULT_INFINITY);
 
-    // 以数组es[]为顶点数据,顶点个数为vertexNum,允许的顶点最大数目为vertexMaxNum,
-    // infinit表示无穷大,边数为0构造有向网
     AdjListDirNetwork(int vertexMaxNum = DEFAULT_SIZE,
                       WeightType infinit = (WeightType) DEFAULT_INFINITY);
 
-    // 构造允许的顶点最大数目为vertexMaxNum,infinit表示无穷大,边数为0的有向网
     ~AdjListDirNetwork();                         // 析构函数
+
     void Clear();                                 // 清空有向网
     bool IsEmpty();                              // 判断有向网是否为空
     int GetOrder(ElemType &d) const;             // 求顶点的序号
@@ -55,18 +51,13 @@ public:
     AdjListDirNetwork<ElemType, WeightType> &operator=
             (const AdjListDirNetwork<ElemType, WeightType> &copy); // 重载赋值运算符
     void Display();    // 显示有向网邻接表
+
     int CountDegree(int v);
-
     int ConnectedComponent();
-
     int MiniSpanTreeKruskal();
-
     int MiniSpanTreeKruskal(WeightType *wt, bool &no_unsigned);
-
     void MiniSpanTreePrim(int u0);
-
-    void BreakCircle();
-
+    void Boruvka();
     bool hasUniqueMinTree();
 };
 
@@ -294,21 +285,11 @@ void AdjListDirNetwork<ElemType, WeightType>::DeleteVex(const ElemType &d)
     for (int u = 0; u < vexNum; u++)           // 删除d与v的弧
         if (u != v)
             DeleteArc(u, v);
-/*
-    p = vexTable[v].firstarc;                  // 删除从d出发的弧
-    while (p != NULL) {
-        vexTable[v].firstarc = p->nextarc;
-        delete p;
-        p = vexTable[v].firstarc;
-        arcNum--;
-    }
-*/
     vexNum--;
     vexTable[v].data = vexTable[vexNum].data;
     vexTable[v].firstarc = vexTable[vexNum].firstarc;
     vexTable[vexNum].firstarc = NULL;
     tag[v] = tag[vexNum];
-
     for (int u = 0; u < vexNum; u++)        // 遍历邻接表头 如果有节点曾连过vexNum处节点 则将其迁移至v处
         if (u != v) {
             p = vexTable[u].firstarc;
@@ -355,7 +336,6 @@ void AdjListDirNetwork<ElemType, WeightType>::DeleteArc(int v1, int v2)
     else
         q->nextarc = p->nextarc;
     delete p;
-
     arcNum--;
 }
 
@@ -415,14 +395,12 @@ void AdjListDirNetwork<ElemType, WeightType>::SetWeight(int v1, int v2, WeightTy
         throw Error("v1不能等于v2!");    // 抛出异常
     if (w == infinity)
         throw Error("w不能为无空大!");   // 抛出异常
-
     AdjListNetworkArc<WeightType> *p;
     p = vexTable[v1].firstarc;
     while (p != NULL && p->adjVex != v2)
         p = p->nextarc;
     if (p != NULL)                        // p == NULL 说明边不存在
         p->weight = w;                    // 修改权值
-
     p = vexTable[v2].firstarc;
     while (p != NULL && p->adjVex != v1)
         p = p->nextarc;
@@ -437,7 +415,6 @@ Status AdjListDirNetwork<ElemType, WeightType>::GetTag(int v) const
 {
     if (v < 0 || v >= vexNum)
         throw Error("v不合法!");        // 抛出异常
-
     return tag[v];
 }
 
@@ -447,7 +424,6 @@ void AdjListDirNetwork<ElemType, WeightType>::SetTag(int v, Status val) const
 {
     if (v < 0 || v >= vexNum)
         throw Error("v不合法!");        // 抛出异常
-
     tag[v] = val;
 }
 
@@ -460,7 +436,6 @@ AdjListDirNetwork<ElemType, WeightType>::AdjListDirNetwork(const AdjListDirNetwo
     vexNum = copy.vexNum;
     vexMaxNum = copy.vexMaxNum;
     arcNum = copy.arcNum;
-
     tag = new Status[vexMaxNum];
     vexTable = new AdjListNetWorkVex<ElemType, WeightType>[vexMaxNum];
     for (int v = 0; v < vexNum; v++) {
@@ -490,13 +465,11 @@ AdjListDirNetwork<ElemType, WeightType>::operator=(const AdjListDirNetwork<ElemT
         Clear();                                    // 释放当前有向网边结点
         delete[]tag;                                // 释放当前有向网标志数组
         delete[]vexTable;                            // 释放当前有向网顶点表
-
         AdjListNetworkArc<WeightType> *p, *q;
         infinity = copy.infinity;
         vexNum = copy.vexNum;
         vexMaxNum = copy.vexMaxNum;
         arcNum = copy.arcNum;
-
         tag = new Status[vexMaxNum];
         vexTable = new AdjListNetWorkVex<ElemType, WeightType>[vexMaxNum];
         for (int v = 0; v < vexNum; v++) {
@@ -587,21 +560,17 @@ struct KEdge {
         v1 = v2 = -1;
         w = 0;
     }
-
     KEdge(int v11, int v22, ElemType w1) {
         v1 = v11;
         v2 = v22;
         w = w1;
     }
-
     bool operator<=(const KEdge<ElemType, WeightType> &Ed) {
         return w <= Ed.w;
     }
-
     bool operator>(const KEdge<ElemType, WeightType> &Ed) {
         return w > Ed.w;
     }
-
     struct KEdge<ElemType, WeightType> &operator=(KEdge<ElemType, WeightType> &Ed) {
         if (&Ed != this) {
             v1 = Ed.v1;
@@ -635,9 +604,10 @@ int AdjListDirNetwork<ElemType, WeightType>::MiniSpanTreeKruskal() {
         KEdge<ElemType, WeightType> k;
         ha.DeleteTop(k);
         ElemType e1 = k.v1, e2 = k.v2;
+        WeightType w = k.w;
         if (u.Differ(e1, e2)) {
             u.Union(e1, e2);
-            cout << '(' << e1 << ',' << e2 << ')' << '\t' << GetWeight(GetOrder(e1), GetOrder(e2)) << endl;
+            cout << '(' << e1 << ',' << e2 << ')' << '\t' << w << endl;
             totalw += GetWeight(GetOrder(e1), GetOrder(e2));
             cnt++;
         }
@@ -700,7 +670,8 @@ void AdjListDirNetwork<ElemType, WeightType>::MiniSpanTreePrim(int u0) {
     }
     closearcs[u0].w = 0;
     closearcs[u0].nearvex = -1;
-    for (int num_added_arc = 0; num_added_arc <= vexNum - 2; num_added_arc++) {
+    int num_added_arc = 0;
+    while (num_added_arc <= vexNum - 2) {
         WeightType minw = GetInfinity();
         int toadd = u0;
         for (int i = 0; i < vexNum; i++) {
@@ -715,6 +686,9 @@ void AdjListDirNetwork<ElemType, WeightType>::MiniSpanTreePrim(int u0) {
             GetElem(toadd, e1);
             GetElem(closearcs[toadd].nearvex, e2);
             cout << '(' << e2 << ',' << e1 << ')' << '\t' << GetWeight(toadd, closearcs[toadd].nearvex) << endl;
+            num_added_arc++;
+            if (num_added_arc >= vexNum - 1)
+                break;
             for (int i = FirstAdjVex(toadd); i != -1; i = NextAdjVex(toadd, i)) {
                 if (closearcs[i].w != 0 && GetWeight(toadd, i) < closearcs[i].w) {
                     closearcs[i].w = GetWeight(toadd, i);
@@ -754,39 +728,56 @@ bool AdjListDirNetwork<ElemType, WeightType>::hasUniqueMinTree() {  //参考博客ht
 }
 
 template<class ElemType, class WeightType>
-void
-AdjListDirNetwork<ElemType, WeightType>::DFS(int start, int curv, int arcnum, int &v1_to_delete, int &v2_to_delete) {
-    if (arcnum == vexNum - 1 || curv == start) {
-        if (curv == start)
-            DeleteArc(v1_to_delete, v2_to_delete);
-        return;
-    } else {
-        int j = curv;
-        for (int i = FirstAdjVex(curv); i != -1; i = NextAdjVex(curv, i)) {
-            if (GetWeight(v1_to_delete, v2_to_delete) < GetWeight(j, i)) {
-                v1_to_delete = i;
-                v2_to_delete = curv;
+void AdjListDirNetwork<ElemType, WeightType>::Boruvka() {
+    if (ConnectedComponent() > 1)
+        throw Error("该图非连通网络，无法求最小生成树!");
+    ElemType *kvex = new ElemType[vexNum];
+    for (int i = 0; i < vexNum; i++)
+        kvex[i] = vexTable[i].data;
+    UFSets<ElemType> u(kvex, vexNum);
+    int treearc = 0;
+    int *mn = new int[vexNum]; //mn[i]表示以下标i元素为根的子树的最小权外边的终点
+    int *ms = new int[vexNum]; //ms[i]表示以下标i元素为根的子树的最小权外边的起点
+    int *minw = new int[vexNum];//minw[i]表示以下标i为根的子树最小权外边的权
+    bool *isroot = new bool[vexNum];
+    for (int i = 0; i < vexNum; i++) {
+        isroot[i] = 1;
+        mn[i] = infinity;
+        ms[i] = infinity;
+        minw[i] = infinity;
+    }
+    while (treearc < vexNum - 1) {
+        for (int i = 0; i < u.Getsize(); i++) {
+            int fa = u.Find(u.GetElem(i));
+            int archead = -1;
+            for (int j = FirstAdjVex(i); j != -1; j = NextAdjVex(i, j)) {
+                if (u.Differ(u.GetElem(i), u.GetElem(j)) && GetWeight(i, j) < minw[fa]) {
+                    minw[fa] = GetWeight(i, j);
+                    archead = j;
+                }
             }
-            DFS(start, i, arcnum + 1, v1_to_delete, v2_to_delete);
-            j = i;
+            if (archead < mn[fa]) {
+                ms[fa] = i;
+                mn[fa] = archead;
+            }
+        }
+        for (int i = 0; i < vexNum; i++) {
+            ElemType e1, e2;
+            GetElem(i, e1);
+            GetElem(mn[i], e2);
+            if (mn[i] != infinity && u.Differ(e1, e2)) {
+                u.Union(u.GetElem(i), u.GetElem(mn[i]));
+                cout << '(' << u.GetElem(i) << ',' << u.GetElem(mn[i]) << ")\t" << minw[i] << endl;
+                isroot[u.Find(u.GetElem(mn[i]))] = false;
+                treearc++;
+                if (treearc == vexNum - 1)
+                    break;
+            }
         }
     }
-}
-
-template<class ElemType, class WeightType>
-void AdjListDirNetwork<ElemType, WeightType>::BreakCircle() {
-    AdjListDirNetwork<ElemType, WeightType> temp(*this);
-    int v1_to_delete, v2_to_delete;
-    for (int i = 0; i < vexNum; i++) {
-        v1_to_delete = i;
-        v2_to_delete = FirstAdjVex(i);
-        if (FirstAdjVex(i) == -1)
-            continue;
-        DFS(i, FirstAdjVex(i), 1, v1_to_delete, v2_to_delete);
-    }
-    Display();
-    *this = temp;
-    return;
+    delete[]mn;
+    delete[]ms;
+    delete[]minw;
 }
 
 #endif
