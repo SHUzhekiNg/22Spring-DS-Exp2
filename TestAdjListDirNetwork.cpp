@@ -1,32 +1,30 @@
-#include "includes/Assistance.h"                    // 辅助软件包
-#include "includes/AdjListDirNetwork.h"        // 邻接表有向网
-#include "includes/Kruskal.h"                    // Kruskal算法
-#include "includes/Prim.h"                    // Kruskal算法
+#include "Assistance.h"                    // 辅助软件包
+#include "AdjListDirNetwork.h"        // 邻接表有向网
 
-int main(void)
-{
-    try									// 用try封装可能出现异常的代码
-	{
-		int infity = DEFAULT_INFINITY;
-		char vexs[] = {'A', 'B', 'C', 'D'};
-		int m[4][4] = {
-			{infity, 2, 3, 4},
-			{2, infity, 5, 6},
-			{3, 5, infity, 7},
-			{4, 6, 7, infity}
-		};
-		char c = 'a', e, e1, e2;
-		int n = 4, v, v1, v2, w;
+int main(void) {
+    try                                    // 用try封装可能出现异常的代码
+    {
+        int infity = DEFAULT_INFINITY;
+        char vexs[] = {'A', 'B', 'C', 'D'};
+        /*int m[4][4] = {
+                {infity, 2,      3,      4},
+                {2,      infity, 5,      6},
+                {3,      5,      infity, 7},
+                {4,      6,      7,      infity}
+        };*/
+        char c = 'a', e, e1, e2;
+        int n = 4, v, v1, v2, w;
+        bool flag;
+        AdjListDirNetwork<char, int> net(vexs, n);
 
-		AdjListDirNetwork<char, int> net(vexs, n);
+        for (int v = 0; v < n; v++)
+            for (int u = v + 1; u < n; u++) {
+                net.InsertArc(v,u,v + u);
+            }
 
-		for (int v = 0; v < n; v++)
-			for (int u = 0; u < n; u++)
-				if (m[v][u] != infity) net.InsertArc(v, u, m[v][u]);
-
-	    while (c != '0')	{
-            cout << endl << "1. 有向网清空.";
-            cout << endl << "2. 显示有向网.";
+        while (c != 'Z') {
+            cout << endl << "1. 无向网清空.";
+            cout << endl << "2. 显示无向网.";
             cout << endl << "3. 取指定顶点的值.";
             cout << endl << "4. 设置指定顶点的值.";
             cout << endl << "5. 删除顶点.";
@@ -34,101 +32,105 @@ int main(void)
             cout << endl << "7. 删除边.";
             cout << endl << "8. 插入边.";
             cout << endl << "9. 设置指定边的权.";
-            cout << endl << "A. Kruskal 求最小生成树.";
-            cout << endl << "B. Prim 求最小生成树.";
-            cout << endl << "C. CountDegree.";
-		    cout << endl << "0. 退出";
-		    cout << endl << "选择功能(0~9):";
-		    cin >> c;
-		    switch (c) 		{
-			    case '1':
-			        net.Clear();
-				    break;
-			    case '2':
+            cout << endl << "A. 显示节点的度";
+            cout << endl << "B. 显示图的连通分量数";
+            cout << endl << "C. 验证Kruska最小生成树算法";
+            cout << endl << "D. 验证Prim最小生成树算法";
+            cout << endl << "E. 判断无向网是否存在唯一的最小生成树";
+            cout << endl << "F. 破圈法求最小生成树";
+            cout << endl << "选择功能(0~F):";
+            cin >> c;
+            switch (c) {
+                case '1':
+                    net.Clear();
+                    break;
+                case '2':
                     if (net.IsEmpty())
                         cout << "该有向网为空。" << endl;
-                    else 
-			            net.Display();
-				    break;
-			    case '3':
-			        cout << endl << "输入顶点序号（有向网的顶点序号从0开始）:";
-			        cin >> v;
-		            net.GetElem(v, e);
-		            cout << "序号为" << v << "的顶点为" << e;
-			        break;
-			    case '4':
-			        cout << endl << "输入顶点序号（有向网的顶点序号从0开始）:";
-			        cin >> v;
-			        cout << endl << "输入" << v <<"号顶点的值:";
-			        cin >> e;
-		            net.SetElem(v, e);
-			        break;
-			    case '5':
-			        cout << endl << "输入被删除顶点的值:";
-			        cin >> e;
-		            net.DeleteVex(e);
-			        break;
-			    case '6':
-			        cout << endl << "输入插入顶点的值:";
-			        cin >> e;
-		            net.InsertVex(e);
-			        break;
-			    case '7':
-			        cout << endl << "输入与被删除边关联的两个顶点值:";
-			        cin >> e1 >> e2;
-			        v1 = net.GetOrder(e1);
-			        v2 = net.GetOrder(e2);
-		            net.DeleteArc(v1, v2);
-			        break;
-			    case '8':
-			        cout << endl << "输入与插入边关联的两个顶点值和边的权值:";
-			        cin >> e1 >> e2 >> w;
-			        v1 = net.GetOrder(e1);
-			        v2 = net.GetOrder(e2);
-		            net.InsertArc(v1, v2, w);
-			        break;
-			    case '9':
-			        cout << endl << "输入与插入边关联的两个顶点值和边的权值:";
-			        cin >> e1 >> e2 >> w;
-			        v1 = net.GetOrder(e1);
-			        v2 = net.GetOrder(e2);
-		            net.SetWeight(v1, v2, w);
-			        break;
+                    else
+                        net.Display();
+                    break;
+                case '3':
+                    cout << endl << "输入顶点序号（有向网的顶点序号从0开始）:";
+                    cin >> v;
+                    net.GetElem(v, e);
+                    cout << "序号为" << v << "的顶点为" << e;
+                    break;
+                case '4':
+                    cout << endl << "输入顶点序号（有向网的顶点序号从0开始）:";
+                    cin >> v;
+                    cout << endl << "输入" << v << "号顶点的值:";
+                    cin >> e;
+                    net.SetElem(v, e);
+                    break;
+                case '5':
+                    cout << endl << "输入被删除顶点的值:";
+                    cin >> e;
+                    net.DeleteVex(e);
+                    break;
+                case '6':
+                    cout << endl << "输入插入顶点的值:";
+                    cin >> e;
+                    net.InsertVex(e);
+                    break;
+                case '7':
+                    cout << endl << "输入与被删除边关联的两个顶点值:";
+                    cin >> e1 >> e2;
+                    v1 = net.GetOrder(e1);
+                    v2 = net.GetOrder(e2);
+                    net.DeleteArc(v1, v2);
+                    break;
+                case '8':
+                    cout << endl << "输入与插入边关联的两个顶点值和边的权值:";
+                    cin >> e1 >> e2 >> w;
+                    v1 = net.GetOrder(e1);
+                    v2 = net.GetOrder(e2);
+                    net.InsertArc(v1, v2, w);
+                    break;
+                case '9':
+                    cout << endl << "输入与插入边关联的两个顶点值和边的权值:";
+                    cin >> e1 >> e2 >> w;
+                    v1 = net.GetOrder(e1);
+                    v2 = net.GetOrder(e2);
+                    net.SetWeight(v1, v2, w);
+                    break;
                 case 'A':
-                    cout << "原网:" << endl;
-                    net.Display();					// 显示网net
-                    cout << endl;
-                    system("PAUSE");
-
-                    cout << "Kruskal算法产生最小生成树的边:" << endl;
-                    MiniSpanTreeKruskal(net);		// Kruskal算法
-                    cout << endl;
+                    cout << endl << "输入节点的下标:";
+                    cin >> v;
+                    cout << net.CountDegree(v) << endl;
                     break;
                 case 'B':
-                    cout << "原网:" << endl;
-                    net.Display();					// 显示网net
-                    cout << endl;
-                    system("PAUSE");				// 调用库函数system()
-
-                    cout << "从顶点A开始，利用Prim算法产生最小生成树的边:" << endl;
-                    MiniSpanTreePrim(net, 0);		// Prim算法
-                    cout << endl;
+                    cout << "图的连通分量数为:" << net.ConnectedComponent() << endl;
                     break;
                 case 'C':
-                    cout << "输入节点:";
-                    cin >> e;
-                    v = net.CountDegree(e);
-                    cout << e << "的度为" << v << endl;				// 显示顶点号
+                    cout << "Kruskal最小生成树:" << endl;
+                    net.MiniSpanTreeKruskal();
                     break;
-
-       	      }
-         }
-	}
-	catch (Error err)					// 捕捉并处理异常
-	{
-		err.Show();						// 显示异常信息
-	}
-	system("PAUSE");					// 调用库函数system()
-	return 0;							// 返回值0, 返回操作系统
+                case 'D':
+                    cout << "指定起点顶点值:";
+                    cin >> e;
+                    cout << "Prim最小生成树:" << endl;
+                    net.MiniSpanTreePrim(net.GetOrder(e));
+                    break;
+                case 'E':
+                    flag = net.hasUniqueMinTree();
+                    if (flag)
+                        cout << "存在唯一最小生成树";
+                    else
+                        cout << "最小生成树不唯一";
+                    cout << endl;
+                    break;
+                case 'F':
+                    net.BreakCircle();
+                    break;
+            }
+        }
+    }
+    catch (Error err)                    // 捕捉并处理异常
+    {
+        err.Show();                        // 显示异常信息
+    }
+    system("PAUSE");                    // 调用库函数system()
+    return 0;                            // 返回值0, 返回操作系统
 }
 
