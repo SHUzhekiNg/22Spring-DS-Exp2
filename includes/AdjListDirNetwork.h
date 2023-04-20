@@ -57,8 +57,9 @@ public:
     int MiniSpanTreeKruskal();
     int MiniSpanTreeKruskal(WeightType *wt, bool &no_unsigned);
     void MiniSpanTreePrim(int u0);
-    void Boruvka();
-    bool hasUniqueMinTree();
+    void MiniSpanTreeBoruvka();
+    bool HasUniqueMinTree();
+    int SuperOrigin(WeightType *origin);
 };
 
 // 有向网的邻接表类的实现部分
@@ -115,7 +116,7 @@ AdjListDirNetwork<ElemType, WeightType>::~AdjListDirNetwork()
 
 template<class ElemType, class WeightType>
 void AdjListDirNetwork<ElemType, WeightType>::Clear()
-// 操作结果：释放所有的边结点，并把有向网的顶点数和边数设置为0.			 
+// 操作结果：释放所有的边结点，并把有向网的顶点数和边数设置为0.
 {
     AdjListNetworkArc<WeightType> *p;
     for (int v = 0; v < vexNum; v++) {    // 释放边结点
@@ -139,7 +140,7 @@ bool AdjListDirNetwork<ElemType, WeightType>::IsEmpty()
 
 template<class ElemType, class WeightType>
 int AdjListDirNetwork<ElemType, WeightType>::GetOrder(ElemType &d) const
-// 操作结果：求顶点d的序号.顶点的序号从0开始，图中不存在顶点d时返回-1. 
+// 操作结果：求顶点d的序号.顶点的序号从0开始，图中不存在顶点d时返回-1.
 {
     int v;
     for (v = 0; v < vexNum; v++)
@@ -180,14 +181,14 @@ Status AdjListDirNetwork<ElemType, WeightType>::SetElem(int v, const ElemType &d
 
 template<class ElemType, class WeightType>
 WeightType AdjListDirNetwork<ElemType, WeightType>::GetInfinity() const
-// 操作结果：返回无穷大的值 
+// 操作结果：返回无穷大的值
 {
     return infinity;
 }
 
 template<class ElemType, class WeightType>
 int AdjListDirNetwork<ElemType, WeightType>::GetVexNum() const
-// 操作结果：返回顶点个数			 
+// 操作结果：返回顶点个数
 {
     return vexNum;
 }
@@ -201,7 +202,7 @@ int AdjListDirNetwork<ElemType, WeightType>::GetArcNum() const
 
 template<class ElemType, class WeightType>
 int AdjListDirNetwork<ElemType, WeightType>::FirstAdjVex(int v) const
-// 操作结果：返回顶点v的第一个邻接点			 
+// 操作结果：返回顶点v的第一个邻接点
 {
     if (v < 0 || v >= vexNum)
         throw Error("v不合法!");// 抛出异常
@@ -214,7 +215,7 @@ int AdjListDirNetwork<ElemType, WeightType>::FirstAdjVex(int v) const
 
 template<class ElemType, class WeightType>
 int AdjListDirNetwork<ElemType, WeightType>::NextAdjVex(int v1, int v2) const
-// 操作结果：返回顶点v1的相对于v2的下一个邻接点			 
+// 操作结果：返回顶点v1的相对于v2的下一个邻接点
 {
     AdjListNetworkArc<WeightType> *p;
     if (v1 < 0 || v1 >= vexNum)
@@ -236,7 +237,7 @@ int AdjListDirNetwork<ElemType, WeightType>::NextAdjVex(int v1, int v2) const
 
 template<class ElemType, class WeightType>
 void AdjListDirNetwork<ElemType, WeightType>::InsertVex(const ElemType &d)
-// 操作结果：在顶点表的表尾插入元素值为d的顶点。			 
+// 操作结果：在顶点表的表尾插入元素值为d的顶点。
 {
     if (vexNum == vexMaxNum)
         throw Error("图的顶点数不能超过允许的最大数!");    // 抛出异常
@@ -251,7 +252,7 @@ void AdjListDirNetwork<ElemType, WeightType>::InsertVex(const ElemType &d)
 
 template<class ElemType, class WeightType>
 void AdjListDirNetwork<ElemType, WeightType>::InsertArc(int v1, int v2, WeightType w)
-// 操作结果：插入顶点为v1和v2,权为w的边			 
+// 操作结果：插入顶点为v1和v2,权为w的边
 {
     if (v1 < 0 || v1 >= vexNum)
         throw Error("v1不合法!");    // 抛出异常
@@ -272,7 +273,7 @@ void AdjListDirNetwork<ElemType, WeightType>::InsertArc(int v1, int v2, WeightTy
 
 template<class ElemType, class WeightType>
 void AdjListDirNetwork<ElemType, WeightType>::DeleteVex(const ElemType &d)
-// 操作结果：删除元素值为d的顶点			 
+// 操作结果：删除元素值为d的顶点
 {
     int v;
     AdjListNetworkArc<WeightType> *p, *q;
@@ -303,7 +304,7 @@ void AdjListDirNetwork<ElemType, WeightType>::DeleteVex(const ElemType &d)
 
 template<class ElemType, class WeightType>
 void AdjListDirNetwork<ElemType, WeightType>::DeleteArc(int v1, int v2)
-// 操作结果：删除顶点为v1和v2的边			 
+// 操作结果：删除顶点为v1和v2的边
 {
     if (v1 < 0 || v1 >= vexNum)
         throw Error("v1不合法!");    // 抛出异常
@@ -411,7 +412,7 @@ void AdjListDirNetwork<ElemType, WeightType>::SetWeight(int v1, int v2, WeightTy
 
 template<class ElemType, class WeightType>
 Status AdjListDirNetwork<ElemType, WeightType>::GetTag(int v) const
-// 操作结果：返回顶点v的标志		 
+// 操作结果：返回顶点v的标志
 {
     if (v < 0 || v >= vexNum)
         throw Error("v不合法!");        // 抛出异常
@@ -420,7 +421,7 @@ Status AdjListDirNetwork<ElemType, WeightType>::GetTag(int v) const
 
 template<class ElemType, class WeightType>
 void AdjListDirNetwork<ElemType, WeightType>::SetTag(int v, Status val) const
-// 操作结果：设置顶点v的标志为val		 
+// 操作结果：设置顶点v的标志为val
 {
     if (v < 0 || v >= vexNum)
         throw Error("v不合法!");        // 抛出异常
@@ -560,17 +561,21 @@ struct KEdge {
         v1 = v2 = -1;
         w = 0;
     }
+
     KEdge(int v11, int v22, ElemType w1) {
         v1 = v11;
         v2 = v22;
         w = w1;
     }
+
     bool operator<=(const KEdge<ElemType, WeightType> &Ed) {
         return w <= Ed.w;
     }
+
     bool operator>(const KEdge<ElemType, WeightType> &Ed) {
         return w > Ed.w;
     }
+
     struct KEdge<ElemType, WeightType> &operator=(KEdge<ElemType, WeightType> &Ed) {
         if (&Ed != this) {
             v1 = Ed.v1;
@@ -613,6 +618,55 @@ int AdjListDirNetwork<ElemType, WeightType>::MiniSpanTreeKruskal() {
         }
     }
     return totalw;
+}
+
+template<class ElemType, class WeightType>
+int AdjListDirNetwork<ElemType, WeightType>::SuperOrigin(WeightType *origin) {
+    const int NN = 510;
+    WeightType w[NN][NN];
+    WeightType dist[NN];
+    bool st[NN];
+    int pre[NN];
+    memset(dist, infinity, sizeof dist);
+    for (int i = 0; i < NN; i++)
+        memset(w[i], infinity, sizeof w[i]);
+    for (int i = 1; i <= vexNum; i++) {
+        w[0][i] = origin[i];
+        w[i][0] = w[0][i];
+    }
+    int start = 1;
+    for (int i = 1; i <= vexNum; i++) {
+        for (AdjListNetworkArc<WeightType> *mm = vexTable[i - 1].firstarc; mm != NULL; mm = mm->nextarc) {
+            w[i][mm->adjVex + 1] = mm->weight;
+        }
+    }
+    dist[0] = 0;
+    int res = 0;
+    for (int i = 0; i < vexNum + 1; i++) {
+        int t = -1;
+        for (int j = 0; j <= vexNum; j++)
+            if (!st[j] && (t == -1 || dist[t] > dist[j]))
+                t = j;
+        st[t] = true;
+        res += dist[t];
+        if (pre[t] == 0 && t != 0) {
+            cout << endl;
+            cout << '(' << vexTable[t - 1].data << ')' << '\t' << dist[t] << endl;
+        } else if (pre[t] != 0 && t != 0) {
+            ElemType sta;
+            GetElem(pre[t] - 1, sta);
+            ElemType end;
+            GetElem(t - 1, end);
+            cout << '(' << sta << ',' << end << ')' << '\t' << dist[t] << endl;
+        }
+        for (int j = 0; j <= vexNum; j++) {
+            if (dist[j] > w[t][j]) {
+                dist[j] = w[t][j];
+                pre[j] = t;
+            }
+        }
+    }
+    return res;
 }
 
 template<class ElemType, class WeightType>
@@ -701,7 +755,7 @@ void AdjListDirNetwork<ElemType, WeightType>::MiniSpanTreePrim(int u0) {
 }
 
 template<class ElemType, class WeightType>
-bool AdjListDirNetwork<ElemType, WeightType>::hasUniqueMinTree() {  //参考博客https://www.cnblogs.com/wkfvawl/p/9845689.html
+bool AdjListDirNetwork<ElemType, WeightType>::HasUniqueMinTree() {  //参考博客https://www.cnblogs.com/wkfvawl/p/9845689.html
     int *WeightNum = new int[infinity + 1]();
     for (int u = 0; u < vexNum - 1; u++) {
         for (int v = u + 1; v < vexNum; v++) {
@@ -728,7 +782,7 @@ bool AdjListDirNetwork<ElemType, WeightType>::hasUniqueMinTree() {  //参考博客ht
 }
 
 template<class ElemType, class WeightType>
-void AdjListDirNetwork<ElemType, WeightType>::Boruvka() {
+void AdjListDirNetwork<ElemType, WeightType>::MiniSpanTreeBoruvka() {
     if (ConnectedComponent() > 1)
         throw Error("该图非连通网络，无法求最小生成树!");
     ElemType *kvex = new ElemType[vexNum];
