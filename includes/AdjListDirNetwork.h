@@ -57,9 +57,10 @@ public:
     int MiniSpanTreeKruskal();
     int MiniSpanTreeKruskal(WeightType *wt, bool &no_unsigned);
     void MiniSpanTreePrim(int u0);
-    void MiniSpanTreeBoruvka();
+    void Boruvka();
     bool HasUniqueMinTree();
-    int SuperOrigin(WeightType *origin);
+    int superorigin(WeightType *origin);
+    int SecondMiniSpanTreeKruskal();
 };
 
 // 有向网的邻接表类的实现部分
@@ -562,7 +563,7 @@ struct KEdge {
         w = 0;
     }
 
-    KEdge(int v11, int v22, ElemType w1) {
+    KEdge(int v11, int v22, WeightType w1) {
         v1 = v11;
         v2 = v22;
         w = w1;
@@ -598,7 +599,8 @@ int AdjListDirNetwork<ElemType, WeightType>::MiniSpanTreeKruskal() {
     for (int i = 0; i < vexNum; i++) {
         for (AdjListNetworkArc<WeightType> *p = vexTable[i].firstarc; p != NULL; p = p->nextarc) {
             if (i < p->adjVex) {
-                KEdge<ElemType, WeightType> k(vexTable[i].data, vexTable[p->adjVex].data, p->weight);
+                WeightType temp = p->weight;
+                KEdge<ElemType, WeightType> k(vexTable[i].data, vexTable[p->adjVex].data, temp);
                 ha.Insert(k);
             }
         }
@@ -621,15 +623,113 @@ int AdjListDirNetwork<ElemType, WeightType>::MiniSpanTreeKruskal() {
 }
 
 template<class ElemType, class WeightType>
-int AdjListDirNetwork<ElemType, WeightType>::SuperOrigin(WeightType *origin) {
+int AdjListDirNetwork<ElemType, WeightType>::SecondMiniSpanTreeKruskal() {
+    if (ConnectedComponent() > 1)
+        throw Error("该图非连通网络，无法求最小生成树!");
+
+    ElemType *kvex = new ElemType[vexNum];
+    for (int i = 0; i < vexNum; i++)
+        kvex[i] = vexTable[i].data;
+    UFSets<ElemType> u(kvex, vexNum);
+    MinHeap<KEdge<ElemType, WeightType>> ha(GetArcNum());
+    for (int i = 0; i < vexNum; i++) {
+        for (AdjListNetworkArc<WeightType> *p = vexTable[i].firstarc; p != NULL; p = p->nextarc) {
+            if (i < p->adjVex) {
+                KEdge<ElemType, WeightType> k(vexTable[i].data, vexTable[p->adjVex].data, p->weight);
+                ha.Insert(k);
+            }
+        }
+    }
+    delete[]kvex;
+    int cnt = 0, totalw = 0;
+    int inflag = 0, outflag = 0;
+    struct Edge {
+        int a, b;
+        WeightType w;
+
+        bool operator<(const Edge &t) const {
+            return w < t.w;
+        }
+    } inedge[510], outedge[510];
+
+    ElemType veer[vexNum];
+    for (int i = 0; i < vexNum; i++)
+        veer[i] = vexTable[i].data;
+    AdjListDirNetwork<ElemType, WeightType> test(veer, vexNum);
+    while (cnt < vexNum - 1) {
+        KEdge<ElemType, WeightType> k;
+        ha.DeleteTop(k);
+        ElemType e1 = k.v1, e2 = k.v2;
+        WeightType w = k.w;
+        if (u.Differ(e1, e2)) {
+            u.Union(e1, e2);
+            //cout << '(' << e1 << ',' << e2 << ')' << '\t' << w << endl;
+            totalw += GetWeight(GetOrder(e1), GetOrder(e2));
+            inedge[inflag].a = GetOrder(e1);
+            inedge[inflag].b = GetOrder(e2);
+            inedge[inflag++].w = GetWeight(GetOrder(e1), GetOrder(e2));
+            test.InsertArc(GetOrder(e1), GetOrder(e2), GetWeight(GetOrder(e1), GetOrder(e2)));
+            cnt++;
+        } else {
+            outedge[outflag].a = GetOrder(e1);
+            outedge[outflag].b = GetOrder(e2);
+            outedge[outflag++].w = GetWeight(GetOrder(e1), GetOrder(e2));
+        }
+    }
+    while (!ha.IsEmpty()) {
+        KEdge<ElemType, WeightType> k;
+        ha.DeleteTop(k);
+        ElemType e1 = k.v1, e2 = k.v2;
+        WeightType w = k.w;
+        outedge[outflag].a = GetOrder(e1);
+        outedge[outflag].b = GetOrder(e2);
+        outedge[outflag++].w = GetWeight(GetOrder(e1), GetOrder(e2));
+    }
+    WeightType mini = 0x3f3f3f;
+    Edge inn;
+    int outfl;
+    for (int i = 0; i < outflag; i++) {
+        test.InsertArc(outedge[i].a, outedge[i].b, outedge[i].w);
+        for (int j = 0; j < inflag; j++) {
+            test.DeleteArc(inedge[j].a, inedge[j].b);
+            if (test.ConnectedComponent() == 1) {
+                if (outedge[i].w <= mini) {
+                    mini = outedge[i].w;
+                    inn.a = outedge[i].a, inn.b = outedge[i].b, inn.w = outedge[i].w;
+                    outfl = j;
+                }
+
+            }
+            test.InsertArc(inedge[j].a, inedge[j].b, inedge[j].w);
+        }
+        test.DeleteArc(outedge[i].a, outedge[i].b);
+    }
+    ElemType sta;
+    GetElem(inn.a, sta);
+    ElemType end;
+    GetElem(inn.b, end);
+    cout << '(' << sta << ',' << end << ')' << '\t' << inn.w << endl;
+    for (int j = 0; j < inflag; j++) {
+        if (j != outfl) {
+            ElemType sta;
+            GetElem(inedge[j].a, sta);
+            ElemType end;
+            GetElem(inedge[j].b, end);
+            cout << '(' << sta << ',' << end << ')' << '\t' << inedge[j].w << endl;
+        }
+    }
+    return totalw;
+}
+
+template<class ElemType, class WeightType>
+int AdjListDirNetwork<ElemType, WeightType>::superorigin(WeightType *origin) {
     const int NN = 510;
     WeightType w[NN][NN];
     WeightType dist[NN];
     bool st[NN];
     int pre[NN];
     memset(dist, infinity, sizeof dist);
-    for (int i = 0; i < NN; i++)
-        memset(w[i], infinity, sizeof w[i]);
+    memset(w, infinity, sizeof dist);
     for (int i = 1; i <= vexNum; i++) {
         w[0][i] = origin[i];
         w[i][0] = w[0][i];
@@ -697,7 +797,6 @@ int AdjListDirNetwork<ElemType, WeightType>::MiniSpanTreeKruskal(WeightType *wt,
             int v1 = GetOrder(e1), v2 = GetOrder(e2);
             if (wt[GetWeight(v1, v2)] >= 2)
                 no_unsigned = false;
-            //cout << '(' << e1 << ',' << e2 << ')' << '\t' << GetWeight(v1, v2) << endl;
             totalw += GetWeight(GetOrder(e1), GetOrder(e2));
             cnt++;
         }
@@ -782,7 +881,7 @@ bool AdjListDirNetwork<ElemType, WeightType>::HasUniqueMinTree() {  //参考博客ht
 }
 
 template<class ElemType, class WeightType>
-void AdjListDirNetwork<ElemType, WeightType>::MiniSpanTreeBoruvka() {
+void AdjListDirNetwork<ElemType, WeightType>::Boruvka() {
     if (ConnectedComponent() > 1)
         throw Error("该图非连通网络，无法求最小生成树!");
     ElemType *kvex = new ElemType[vexNum];
@@ -832,6 +931,7 @@ void AdjListDirNetwork<ElemType, WeightType>::MiniSpanTreeBoruvka() {
     delete[]mn;
     delete[]ms;
     delete[]minw;
+    delete[]isroot;
 }
 
 #endif

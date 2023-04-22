@@ -1,9 +1,10 @@
 #include "Assistance.h"                    // 辅助软件包
 #include "AdjListDirNetwork.h"        // 邻接表有向网
-
+#include <stdlib.h>
 int main(void) {
     try                                    // 用try封装可能出现异常的代码
     {
+        srand(1);
         int infity = DEFAULT_INFINITY;
         char vexs[] = {'A', 'B', 'C', 'D'};
         /*int m[4][4] = {
@@ -21,7 +22,7 @@ int main(void) {
 
         for (int v = 0; v < n; v++)
             for (int u = v + 1; u < n; u++)
-                net.InsertArc(v, u, v + u);
+                net.InsertArc(v, u, rand());
 
         while (c != 'Z') {
             cout << endl << "1. 无向网清空.";
@@ -40,6 +41,7 @@ int main(void) {
             cout << endl << "E. 判断无向网是否存在唯一的最小生成树";
             cout << endl << "F. Boruvka求最小生成树";
             cout << endl << "G. 超级源点问题";
+            cout << endl << "H. 次小生成树";
             cout << endl << "选择功能(0~G):";
             cin >> c;
             switch (c) {
@@ -123,17 +125,22 @@ int main(void) {
                     cout << endl;
                     break;
                 case 'F':
-                    net.MiniSpanTreeBoruvka();
+                    net.Boruvka();
                     break;
                 case 'G':
                     cout << "请按顺序输入(" << net.GetVexNum() << ")个源点值:" << endl;
                     for (int i = 1; i <= net.GetVexNum(); i++) {
                         cin >> ori[i];
                     }
-                    sum = net.SuperOrigin(ori);
+                    sum = net.superorigin(ori);
                     cout << "总权值： " << sum << endl;
                     break;
+                case 'H':
+                    cout << endl;
+                    sum = net.SecondMiniSpanTreeKruskal();
+                    break;
             }
+
         }
     }
     catch (Error err)                    // 捕捉并处理异常

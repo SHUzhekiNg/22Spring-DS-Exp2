@@ -1,9 +1,10 @@
-#include "includes/Assistance.h"                    // 辅助软件包
-#include "includes/AdjListDirNetwork.h"        // 邻接表有向网
-
+#include "Assistance.h"                    // 辅助软件包
+#include "AdjListDirNetwork.h"        // 邻接表有向网
+#include <stdlib.h>
 int main(void) {
     try                                    // 用try封装可能出现异常的代码
     {
+        srand(1);
         int infity = DEFAULT_INFINITY;
         char vexs[] = {'A', 'B', 'C', 'D'};
         /*int m[4][4] = {
@@ -15,12 +16,13 @@ int main(void) {
         char c = 'a', e, e1, e2;
         int n = 4, v, v1, v2, w;
         bool flag;
+        int ori[510];
+        int sum;
         AdjListDirNetwork<char, int> net(vexs, n);
 
         for (int v = 0; v < n; v++)
-            for (int u = v + 1; u < n; u++) {
-                net.InsertArc(v,u,v + u);
-            }
+            for (int u = v + 1; u < n; u++)
+                net.InsertArc(v, u, rand());
 
         while (c != 'Z') {
             cout << endl << "1. 无向网清空.";
@@ -37,8 +39,10 @@ int main(void) {
             cout << endl << "C. 验证Kruska最小生成树算法";
             cout << endl << "D. 验证Prim最小生成树算法";
             cout << endl << "E. 判断无向网是否存在唯一的最小生成树";
-            cout << endl << "F. 破圈法求最小生成树";
-            cout << endl << "选择功能(0~F):";
+            cout << endl << "F. Boruvka求最小生成树";
+            cout << endl << "G. 超级源点问题";
+            cout << endl << "H. 次小生成树";
+            cout << endl << "选择功能(0~G):";
             cin >> c;
             switch (c) {
                 case '1':
@@ -113,7 +117,7 @@ int main(void) {
                     net.MiniSpanTreePrim(net.GetOrder(e));
                     break;
                 case 'E':
-                    flag = net.hasUniqueMinTree();
+                    flag = net.HasUniqueMinTree();
                     if (flag)
                         cout << "存在唯一最小生成树";
                     else
@@ -121,9 +125,22 @@ int main(void) {
                     cout << endl;
                     break;
                 case 'F':
-                    net.BreakCircle();
+                    net.Boruvka();
+                    break;
+                case 'G':
+                    cout << "请按顺序输入(" << net.GetVexNum() << ")个源点值:" << endl;
+                    for (int i = 1; i <= net.GetVexNum(); i++) {
+                        cin >> ori[i];
+                    }
+                    sum = net.superorigin(ori);
+                    cout << "总权值： " << sum << endl;
+                    break;
+                case 'H':
+                    cout << endl;
+                    sum = net.SecondMiniSpanTreeKruskal();
                     break;
             }
+
         }
     }
     catch (Error err)                    // 捕捉并处理异常
