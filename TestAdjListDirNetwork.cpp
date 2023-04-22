@@ -42,7 +42,7 @@ int main(void) {
             cout << endl << "F. Boruvka求最小生成树";
             cout << endl << "G. 超级源点问题";
             cout << endl << "H. 次小生成树";
-            cout << endl << "选择功能(0~G):";
+            cout << endl << "选择功能(0~H):";
             cin >> c;
             switch (c) {
                 case '1':
