@@ -642,20 +642,22 @@ int AdjListDirNetwork<ElemType, WeightType>::SecondMiniSpanTreeKruskal() {
     }
     delete[]kvex;
     int cnt = 0, totalw = 0;
-    int inflag = 0, outflag = 0;
-    struct Edge {
+    int inflag=0,outflag=0;
+    struct Edge
+    {
         int a, b;
         WeightType w;
-
-        bool operator<(const Edge &t) const {
+        bool operator< (const Edge &t) const
+        {
             return w < t.w;
         }
-    } inedge[510], outedge[510];
+    }inedge[510],outedge[510];
 
     ElemType veer[vexNum];
-    for (int i = 0; i < vexNum; i++)
-        veer[i] = vexTable[i].data;
-    AdjListDirNetwork<ElemType, WeightType> test(veer, vexNum);
+    for (int i=0;i<vexNum;i++) veer[i]=vexTable[i].data;
+
+    AdjListDirNetwork<ElemType, WeightType> test(veer,vexNum);
+
     while (cnt < vexNum - 1) {
         KEdge<ElemType, WeightType> k;
         ha.DeleteTop(k);
@@ -665,61 +667,75 @@ int AdjListDirNetwork<ElemType, WeightType>::SecondMiniSpanTreeKruskal() {
             u.Union(e1, e2);
             //cout << '(' << e1 << ',' << e2 << ')' << '\t' << w << endl;
             totalw += GetWeight(GetOrder(e1), GetOrder(e2));
-            inedge[inflag].a = GetOrder(e1);
-            inedge[inflag].b = GetOrder(e2);
-            inedge[inflag++].w = GetWeight(GetOrder(e1), GetOrder(e2));
-            test.InsertArc(GetOrder(e1), GetOrder(e2), GetWeight(GetOrder(e1), GetOrder(e2)));
+            inedge[inflag].a=GetOrder(e1);
+            inedge[inflag].b=GetOrder(e2);
+            inedge[inflag++].w=GetWeight(GetOrder(e1), GetOrder(e2));
+            test.InsertArc(GetOrder(e1),GetOrder(e2),GetWeight(GetOrder(e1), GetOrder(e2)));
             cnt++;
-        } else {
-            outedge[outflag].a = GetOrder(e1);
-            outedge[outflag].b = GetOrder(e2);
-            outedge[outflag++].w = GetWeight(GetOrder(e1), GetOrder(e2));
+        }
+        else
+        {
+            outedge[outflag].a=GetOrder(e1);
+            outedge[outflag].b=GetOrder(e2);
+            outedge[outflag++].w=GetWeight(GetOrder(e1), GetOrder(e2));
         }
     }
-    while (!ha.IsEmpty()) {
+
+    while (!ha.IsEmpty())
+    {
         KEdge<ElemType, WeightType> k;
         ha.DeleteTop(k);
         ElemType e1 = k.v1, e2 = k.v2;
         WeightType w = k.w;
-        outedge[outflag].a = GetOrder(e1);
-        outedge[outflag].b = GetOrder(e2);
-        outedge[outflag++].w = GetWeight(GetOrder(e1), GetOrder(e2));
+        outedge[outflag].a=GetOrder(e1);
+        outedge[outflag].b=GetOrder(e2);
+        outedge[outflag++].w=GetWeight(GetOrder(e1), GetOrder(e2));
     }
-    WeightType mini = 0x3f3f3f;
+
+    WeightType mini=0x3f3f3f;
     Edge inn;
     int outfl;
-    for (int i = 0; i < outflag; i++) {
-        test.InsertArc(outedge[i].a, outedge[i].b, outedge[i].w);
-        for (int j = 0; j < inflag; j++) {
-            test.DeleteArc(inedge[j].a, inedge[j].b);
-            if (test.ConnectedComponent() == 1) {
-                if (outedge[i].w <= mini) {
-                    mini = outedge[i].w;
-                    inn.a = outedge[i].a, inn.b = outedge[i].b, inn.w = outedge[i].w;
-                    outfl = j;
+
+    for (int i=0;i<outflag;i++)
+    {
+        test.InsertArc(outedge[i].a,outedge[i].b,outedge[i].w);
+        for (int j=0;j<inflag;j++)
+        {
+            test.DeleteArc(inedge[j].a,inedge[j].b);
+            if (test.ConnectedComponent()==1)
+            {
+                if (abs(outedge[i].w-inedge[j].w)<=mini)
+                {
+                    mini=abs(outedge[i].w-inedge[j].w);
+                    inn.a=outedge[i].a,inn.b=outedge[i].b,inn.w=outedge[i].w;
+                    outfl=j;
                 }
 
             }
-            test.InsertArc(inedge[j].a, inedge[j].b, inedge[j].w);
+            test.InsertArc(inedge[j].a,inedge[j].b,inedge[j].w);
         }
-        test.DeleteArc(outedge[i].a, outedge[i].b);
+        test.DeleteArc(outedge[i].a,outedge[i].b);
     }
+
     ElemType sta;
-    GetElem(inn.a, sta);
+    GetElem(inn.a,sta);
     ElemType end;
-    GetElem(inn.b, end);
+    GetElem(inn.b,end);
     cout << '(' << sta << ',' << end << ')' << '\t' << inn.w << endl;
-    for (int j = 0; j < inflag; j++) {
-        if (j != outfl) {
+    for (int j=0;j<inflag;j++)
+    {
+        if(j!=outfl)
+        {
             ElemType sta;
-            GetElem(inedge[j].a, sta);
+            GetElem(inedge[j].a,sta);
             ElemType end;
-            GetElem(inedge[j].b, end);
+            GetElem(inedge[j].b,end);
             cout << '(' << sta << ',' << end << ')' << '\t' << inedge[j].w << endl;
         }
     }
-    return totalw;
+    return totalw+mini;
 }
+
 
 template<class ElemType, class WeightType>
 int AdjListDirNetwork<ElemType, WeightType>::superorigin(WeightType *origin) {
