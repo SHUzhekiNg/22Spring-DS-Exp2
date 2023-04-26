@@ -1,6 +1,7 @@
 #include "includes/Assistance.h"                    // 辅助软件包
 #include "includes/AdjListDirNetwork.h"        // 邻接表有向网
 #include <stdlib.h>
+
 int main(void) {
     try                                    // 用try封装可能出现异常的代码
     {
