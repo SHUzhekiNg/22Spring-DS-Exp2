@@ -1,5 +1,5 @@
-#include "Assistance.h"                    // 辅助软件包
-#include "AdjListDirNetwork.h"        // 邻接表有向网
+#include "includes/Assistance.h"                    // 辅助软件包
+#include "includes/AdjListDirNetwork.h"        // 邻接表有向网
 #include <stdlib.h>
 int main(void) {
     try                                    // 用try封装可能出现异常的代码
@@ -42,7 +42,7 @@ int main(void) {
             cout << endl << "F. Boruvka求最小生成树";
             cout << endl << "G. 超级源点问题";
             cout << endl << "H. 次小生成树";
-            cout << endl << "选择功能(0~H):";
+            cout << endl << "选择功能(0~G):";
             cin >> c;
             switch (c) {
                 case '1':
